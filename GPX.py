@@ -119,9 +119,6 @@ def check_firm_by_SSH():
                 port='22',
                 username=user,
                 password=password,
-#                timeout='1',
- #               banner_timeout='5',
-#                auth_timeout='5',
                 look_for_keys=False,
                 allow_agent=False)
             with client.invoke_shell() as ssh:

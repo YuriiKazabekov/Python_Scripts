@@ -4,11 +4,12 @@ import pexpect
 import netmiko
 import time
 import csv
+import getpass
 
-#VOIP_ip = [str(ip) for ip in ipaddress.IPv4Network('10.0.16.0/22')]
-VOIP_ip = ['10.0.16.2', '10.0.16.29']
+VOIP_ip = [str(ip) for ip in ipaddress.IPv4Network('10.0.16.0/22')]
+
 user = 'admin'
-password = 'admin0'
+password = getpass.getpass(prompt='password:')
 
 new_pass = []
 rebooted_phones = []
@@ -173,10 +174,10 @@ def check_firm_by_telnet():
 
 checkpass_by_SSH()
 checkpass_by_telnet()
-check_firm_by_SSH()
-check_firm_by_telnet()
 reboot_by_SSH()
 reboot_by_telnet()
+check_firm_by_SSH()
+check_firm_by_telnet()
 
 print('IP Phones with new pass:', new_pass)
 print('IP Phones that was rebooted:', rebooted_phones)

@@ -7,10 +7,16 @@ import csv
 import getpass
 
 VOIP_ip = [str(ip) for ip in ipaddress.IPv4Network('10.0.16.0/22')]
+<<<<<<< HEAD
 
 user = getpass.getpass(prompt='Input username: ')
 password = getpass.getpass(prompt='Input password: ')
 
+=======
+
+user = 'admin'
+password = getpass.getpass(prompt='password:')
+>>>>>>> b2acf142c9c30259231e077259a00bada23c58ae
 
 new_pass = []
 rebooted_phones = []

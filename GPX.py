@@ -4,11 +4,13 @@ import pexpect
 import netmiko
 import time
 import csv
+import getpass
 
-#VOIP_ip = [str(ip) for ip in ipaddress.IPv4Network('10.0.16.0/22')]
-VOIP_ip = ['10.0.16.2', '10.0.16.29']
-user = 'admin'
-password = 'admin0'
+VOIP_ip = [str(ip) for ip in ipaddress.IPv4Network('10.0.16.0/22')]
+
+user = getpass.getpass(prompt='Input username: ')
+password = getpass.getpass(prompt='Input password: ')
+
 
 new_pass = []
 rebooted_phones = []
@@ -32,7 +34,6 @@ def checkpass_by_SSH():
                     ssh.send('help\n')
                     time.sleep(0.5)
                     result = ssh.recv(100).decode('ascii')
-                    #print(result)
 
                 new_pass.append(ip)
             except:
@@ -52,7 +53,6 @@ def checkpass_by_telnet():
                 telnet.sendline('help')
                 telnet.expect('[>]')
                 result = telnet.before.decode('ascii')
-                #print(result)
 
                 telnet.close()
                 new_pass.append(ip)
@@ -79,7 +79,7 @@ def reboot_by_SSH():
                 time.sleep(2)
                 result = ssh.recv(100).decode('ascii')
                 time.sleep(2)
-                #print(result)
+
 
                 rebooted_phones.append(ip)
         except:
@@ -98,7 +98,6 @@ def reboot_by_telnet():
                 telnet.sendline('reboot')
                 telnet.expect('[...]')
                 result = telnet.before.decode('ascii')
-                #print(result)
                 time.sleep(5)
                 telnet.close()
                 rebooted_phones.append(ip)
@@ -118,9 +117,6 @@ def check_firm_by_SSH():
                 port='22',
                 username=user,
                 password=password,
-#                timeout='1',
- #               banner_timeout='5',
-#                auth_timeout='5',
                 look_for_keys=False,
                 allow_agent=False)
             with client.invoke_shell() as ssh:
@@ -129,15 +125,14 @@ def check_firm_by_SSH():
                 time.sleep(2)
                 result = ssh.recv(1000).decode('ascii')
                 index = result.find("IP")
-                #print(index)
-                IP = result[index + 14: index + 25]
-                #print(IP)
+                IP =result[index + 14: index + 25]
+                index = result.find("Model:")
+                MODEL = result[index +7: index + 16]
                 index = result.find("Prog")
-                #print(index)
                 FW = result[index +8: index + 17]
-                print(IP.rstrip() +" fw " + FW.rstrip())
-                #firm.append(result)
-                firm[IP.rstrip()]="fw " + FW.rstrip()
+                print( "IP: " + IP.rstrip() +" Model: " + MODEL.rstrip() + " FW: " + FW.rstrip())
+                info = " Model: " + MODEL.rstrip() + " FW: " + FW.rstrip()
+                firm["IP: " + IP.rstrip()]=info
 
         except:
             pass
@@ -155,32 +150,29 @@ def check_firm_by_telnet():
                 telnet.sendline('status')
                 telnet.expect('[>]')
                 result = telnet.before.decode('ascii')
-                #print(result)
-                #time.sleep(1)
                 telnet.close()
                 index = result.find("IP")
                 IP = result[index + 14: index + 25]
-                #print(IP)
+                index = result.find("Model:")
+                MODEL = result[index +7: index + 16]
                 index = result.find("Prog")
-                FW = result[index + 8: index + 17]
-                #print(IP + FW)
-                print(IP.rstrip() +" fw " + FW.rstrip())
-                firm[IP.rstrip()]="fw " + FW.rstrip()
-                #rebooted_phones.append(ip)
+                FW = result[index +8: index + 17]
+                info = " Model: " + MODEL.rstrip() + " FW: " + FW.rstrip()
+                firm["IP: " + IP.rstrip()]=info
         except:
             pass
 
 
 checkpass_by_SSH()
 checkpass_by_telnet()
-check_firm_by_SSH()
-check_firm_by_telnet()
 reboot_by_SSH()
 reboot_by_telnet()
+check_firm_by_SSH()
+check_firm_by_telnet()
 
 print('IP Phones with new pass:', new_pass)
 print('IP Phones that was rebooted:', rebooted_phones)
-#print(firm)
+print('Firmware list:',firm)
 
 
 firm_file = open("firmware.csv", "w")
